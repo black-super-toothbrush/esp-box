@@ -61,7 +61,7 @@ static void ui_button_style_init(void)
     lv_style_set_shadow_width(&g_btn_styles.style_bg, 0);
 }
 
-static void play_index(int index)
+void play_index(int index)
 {
     ESP_LOGI(TAG, "play_index(%d)", index);
 
@@ -337,142 +337,164 @@ static void music_list_cb(lv_event_t *event)
     }
 }
 
+// void ui_audio_start(file_iterator_instance_t *i)
+// {
+//     file_iterator = i;
+//     g_sys_volume = 60;
+
+//     ui_button_style_init();
+
+//     lv_indev_t *indev = lv_indev_get_next(NULL);
+
+//     if (lv_indev_get_type(indev) == LV_INDEV_TYPE_ENCODER) {
+//         ESP_LOGI(TAG, "Input device type is encoder");
+//         g_btn_op_group = lv_group_create();
+//         lv_indev_set_group(indev, g_btn_op_group);
+//     }
+
+//     /* Create audio control button */
+//     lv_obj_t *btn_play_pause = lv_btn_create(lv_scr_act());
+//     lv_obj_align(btn_play_pause, LV_ALIGN_CENTER, 0, 40);
+//     lv_obj_set_size(btn_play_pause, 50, 50);
+//     lv_obj_set_style_radius(btn_play_pause, 25, LV_STATE_DEFAULT);
+//     lv_obj_add_flag(btn_play_pause, LV_OBJ_FLAG_CHECKABLE);
+
+//     lv_obj_add_style(btn_play_pause, &ui_button_styles()->style_focus_no_outline, LV_STATE_FOCUS_KEY);
+//     lv_obj_add_style(btn_play_pause, &ui_button_styles()->style_focus_no_outline, LV_STATE_FOCUSED);
+
+//     lv_obj_t *label_play_pause = lv_label_create(btn_play_pause);
+//     lv_label_set_text_static(label_play_pause, LV_SYMBOL_PAUSE);
+//     lv_obj_center(label_play_pause);
+//     lv_obj_set_user_data(btn_play_pause, (void *) label_play_pause);
+// #if CONFIG_BSP_BOARD_ESP32_S3_BOX_Lite
+//     lv_obj_add_event_cb(btn_play_pause, music_play_pause_cb, LV_EVENT_ALL, (void *) btn_play_pause);
+// #else
+//     lv_obj_add_event_cb(btn_play_pause, btn_play_pause_cb, LV_EVENT_VALUE_CHANGED, NULL);
+// #endif
+
+//     lv_obj_t *btn_play_prev = lv_btn_create(lv_scr_act());
+//     lv_obj_set_size(btn_play_prev, 50, 50);
+//     lv_obj_set_style_radius(btn_play_prev, 25, LV_STATE_DEFAULT);
+//     lv_obj_clear_flag(btn_play_prev, LV_OBJ_FLAG_CHECKABLE);
+//     lv_obj_align_to(btn_play_prev, btn_play_pause, LV_ALIGN_OUT_LEFT_MID, -40, 0);
+
+//     lv_obj_add_style(btn_play_prev, &ui_button_styles()->style_focus_no_outline, LV_STATE_FOCUS_KEY);
+//     lv_obj_add_style(btn_play_prev, &ui_button_styles()->style_focus_no_outline, LV_STATE_FOCUSED);
+//     lv_obj_add_style(btn_play_prev, &ui_button_styles()->style_bg, LV_STATE_FOCUS_KEY);
+//     lv_obj_add_style(btn_play_prev, &ui_button_styles()->style_bg, LV_STATE_FOCUSED);
+//     lv_obj_add_style(btn_play_prev, &ui_button_styles()->style_bg, LV_STATE_DEFAULT);
+
+//     lv_obj_t *label_prev = lv_label_create(btn_play_prev);
+//     lv_label_set_text_static(label_prev, LV_SYMBOL_PREV);
+//     lv_obj_set_style_text_font(label_prev, &lv_font_montserrat_24, LV_STATE_DEFAULT);
+//     lv_obj_set_style_text_color(label_prev, lv_color_make(0, 0, 0), LV_STATE_DEFAULT);
+//     lv_obj_center(label_prev);
+//     lv_obj_set_user_data(btn_play_prev, (void *) label_prev);
+
+// #if CONFIG_BSP_BOARD_ESP32_S3_BOX_Lite
+//     g_group_list[0] = btn_play_prev;
+//     lv_obj_add_event_cb(btn_play_prev, music_list_prev_cb, LV_EVENT_ALL, (void *) btn_play_prev);
+//     if (ui_get_btn_op_group()) {
+//         lv_group_add_obj(ui_get_btn_op_group(), btn_play_prev);
+//     }
+// #else
+//     lv_obj_add_event_cb(btn_play_prev, btn_prev_next_cb, LV_EVENT_CLICKED, (void *) false);
+// #endif
+
+// #if CONFIG_BSP_BOARD_ESP32_S3_BOX_Lite
+//     g_group_list[1] = btn_play_pause;
+//     if (ui_get_btn_op_group()) {
+//         lv_group_add_obj(ui_get_btn_op_group(), btn_play_pause);
+//     }
+// #endif
+
+//     lv_obj_t *btn_play_next = lv_btn_create(lv_scr_act());
+//     lv_obj_set_size(btn_play_next, 50, 50);
+//     lv_obj_set_style_radius(btn_play_next, 25, LV_STATE_DEFAULT);
+//     lv_obj_clear_flag(btn_play_next, LV_OBJ_FLAG_CHECKABLE);
+//     lv_obj_align_to(btn_play_next, btn_play_pause, LV_ALIGN_OUT_RIGHT_MID, 40, 0);
+
+//     lv_obj_add_style(btn_play_next, &ui_button_styles()->style_focus_no_outline, LV_STATE_FOCUS_KEY);
+//     lv_obj_add_style(btn_play_next, &ui_button_styles()->style_focus_no_outline, LV_STATE_FOCUSED);
+//     lv_obj_add_style(btn_play_next, &ui_button_styles()->style_bg, LV_STATE_FOCUS_KEY);
+//     lv_obj_add_style(btn_play_next, &ui_button_styles()->style_bg, LV_STATE_FOCUSED);
+//     lv_obj_add_style(btn_play_next, &ui_button_styles()->style_bg, LV_STATE_DEFAULT);
+
+//     lv_obj_t *label_next = lv_label_create(btn_play_next);
+//     lv_label_set_text_static(label_next, LV_SYMBOL_NEXT);
+//     lv_obj_set_style_text_font(label_next, &lv_font_montserrat_24, LV_STATE_DEFAULT);
+//     lv_obj_set_style_text_color(label_next, lv_color_make(0, 0, 0), LV_STATE_DEFAULT);
+//     lv_obj_center(label_next);
+//     lv_obj_set_user_data(btn_play_next, (void *) label_next);
+
+// #if CONFIG_BSP_BOARD_ESP32_S3_BOX_Lite
+//     g_group_list[2] = btn_play_next;
+//     lv_obj_add_event_cb(btn_play_next, music_list_next_cb, LV_EVENT_ALL, (void *) btn_play_next);
+//     if (ui_get_btn_op_group()) {
+//         lv_group_add_obj(ui_get_btn_op_group(), btn_play_next);
+//     }
+// #else
+//     lv_obj_add_event_cb(btn_play_next, btn_prev_next_cb, LV_EVENT_CLICKED, (void *) true);
+// #endif
+
+//     /* Create volume slider */
+//     lv_obj_t *volume_slider = lv_slider_create(lv_scr_act());
+//     lv_obj_set_size(volume_slider, 200, 6);
+//     lv_obj_set_ext_click_area(volume_slider, 15);
+//     lv_obj_align(volume_slider, LV_ALIGN_BOTTOM_MID, 0, -20);
+//     lv_slider_set_range(volume_slider, 0, 100);
+//     lv_slider_set_value(volume_slider, g_sys_volume, LV_ANIM_ON);
+//     lv_obj_add_event_cb(volume_slider, volume_slider_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+//     lv_obj_t *lab_vol_min = lv_label_create(lv_scr_act());
+//     lv_label_set_text_static(lab_vol_min, LV_SYMBOL_VOLUME_MID);
+//     lv_obj_set_style_text_font(lab_vol_min, &lv_font_montserrat_20, LV_STATE_DEFAULT);
+//     lv_obj_align_to(lab_vol_min, volume_slider, LV_ALIGN_OUT_LEFT_MID, -10, 0);
+
+//     lv_obj_t *lab_vol_max = lv_label_create(lv_scr_act());
+//     lv_label_set_text_static(lab_vol_max, LV_SYMBOL_VOLUME_MAX);
+//     lv_obj_set_style_text_font(lab_vol_max, &lv_font_montserrat_20, LV_STATE_DEFAULT);
+//     lv_obj_align_to(lab_vol_max, volume_slider, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+
+//     lv_obj_t *lab_title = lv_label_create(lv_scr_act());
+//     lv_obj_set_user_data(lab_title, (void *) btn_play_pause);
+//     lv_label_set_text_static(lab_title, "Scanning Files...");
+//     lv_obj_set_style_text_font(lab_title, &lv_font_montserrat_32, LV_STATE_DEFAULT);
+//     lv_obj_align(lab_title, LV_ALIGN_TOP_MID, 0, 20);
+
+//     lv_obj_t *music_list = lv_dropdown_create(lv_scr_act());
+//     lv_dropdown_clear_options(music_list);
+//     lv_dropdown_set_options_static(music_list, "Scanning...");
+//     lv_obj_set_width(music_list, 200);
+//     lv_obj_align_to(music_list, lab_title, LV_ALIGN_OUT_BOTTOM_MID, 0, 20);
+//     lv_obj_set_user_data(music_list, (void *) lab_title);
+//     lv_obj_add_event_cb(music_list, music_list_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+//     build_file_list(music_list);
+//     audio_player_callback_register(audio_callback, (void *) music_list);
+
+//     // initiate playback
+//     play_index(file_iterator_get_index(file_iterator));
+// }
+
+
+
 void ui_audio_start(file_iterator_instance_t *i)
 {
     file_iterator = i;
-    g_sys_volume = 60;
+    g_sys_volume = 80;   // 默认音量，可选
 
-    ui_button_style_init();
+    // 不需要 UI 按钮、slider、label 这些 LVGL 对象
 
-    lv_indev_t *indev = lv_indev_get_next(NULL);
 
-    if (lv_indev_get_type(indev) == LV_INDEV_TYPE_ENCODER) {
-        ESP_LOGI(TAG, "Input device type is encoder");
-        g_btn_op_group = lv_group_create();
-        lv_indev_set_group(indev, g_btn_op_group);
+
+    bsp_codec_volume_set(g_sys_volume,NULL);
+
+    FILE *fp = fopen("/spiffs/For_Elise.mp3", "rb");
+    if (fp) {
+        ESP_LOGI(TAG, "Playing '%s'", "For_Elise");
+        audio_player_play(fp);
     }
 
-    /* Create audio control button */
-    lv_obj_t *btn_play_pause = lv_btn_create(lv_scr_act());
-    lv_obj_align(btn_play_pause, LV_ALIGN_CENTER, 0, 40);
-    lv_obj_set_size(btn_play_pause, 50, 50);
-    lv_obj_set_style_radius(btn_play_pause, 25, LV_STATE_DEFAULT);
-    lv_obj_add_flag(btn_play_pause, LV_OBJ_FLAG_CHECKABLE);
-
-    lv_obj_add_style(btn_play_pause, &ui_button_styles()->style_focus_no_outline, LV_STATE_FOCUS_KEY);
-    lv_obj_add_style(btn_play_pause, &ui_button_styles()->style_focus_no_outline, LV_STATE_FOCUSED);
-
-    lv_obj_t *label_play_pause = lv_label_create(btn_play_pause);
-    lv_label_set_text_static(label_play_pause, LV_SYMBOL_PAUSE);
-    lv_obj_center(label_play_pause);
-    lv_obj_set_user_data(btn_play_pause, (void *) label_play_pause);
-#if CONFIG_BSP_BOARD_ESP32_S3_BOX_Lite
-    lv_obj_add_event_cb(btn_play_pause, music_play_pause_cb, LV_EVENT_ALL, (void *) btn_play_pause);
-#else
-    lv_obj_add_event_cb(btn_play_pause, btn_play_pause_cb, LV_EVENT_VALUE_CHANGED, NULL);
-#endif
-
-    lv_obj_t *btn_play_prev = lv_btn_create(lv_scr_act());
-    lv_obj_set_size(btn_play_prev, 50, 50);
-    lv_obj_set_style_radius(btn_play_prev, 25, LV_STATE_DEFAULT);
-    lv_obj_clear_flag(btn_play_prev, LV_OBJ_FLAG_CHECKABLE);
-    lv_obj_align_to(btn_play_prev, btn_play_pause, LV_ALIGN_OUT_LEFT_MID, -40, 0);
-
-    lv_obj_add_style(btn_play_prev, &ui_button_styles()->style_focus_no_outline, LV_STATE_FOCUS_KEY);
-    lv_obj_add_style(btn_play_prev, &ui_button_styles()->style_focus_no_outline, LV_STATE_FOCUSED);
-    lv_obj_add_style(btn_play_prev, &ui_button_styles()->style_bg, LV_STATE_FOCUS_KEY);
-    lv_obj_add_style(btn_play_prev, &ui_button_styles()->style_bg, LV_STATE_FOCUSED);
-    lv_obj_add_style(btn_play_prev, &ui_button_styles()->style_bg, LV_STATE_DEFAULT);
-
-    lv_obj_t *label_prev = lv_label_create(btn_play_prev);
-    lv_label_set_text_static(label_prev, LV_SYMBOL_PREV);
-    lv_obj_set_style_text_font(label_prev, &lv_font_montserrat_24, LV_STATE_DEFAULT);
-    lv_obj_set_style_text_color(label_prev, lv_color_make(0, 0, 0), LV_STATE_DEFAULT);
-    lv_obj_center(label_prev);
-    lv_obj_set_user_data(btn_play_prev, (void *) label_prev);
-
-#if CONFIG_BSP_BOARD_ESP32_S3_BOX_Lite
-    g_group_list[0] = btn_play_prev;
-    lv_obj_add_event_cb(btn_play_prev, music_list_prev_cb, LV_EVENT_ALL, (void *) btn_play_prev);
-    if (ui_get_btn_op_group()) {
-        lv_group_add_obj(ui_get_btn_op_group(), btn_play_prev);
-    }
-#else
-    lv_obj_add_event_cb(btn_play_prev, btn_prev_next_cb, LV_EVENT_CLICKED, (void *) false);
-#endif
-
-#if CONFIG_BSP_BOARD_ESP32_S3_BOX_Lite
-    g_group_list[1] = btn_play_pause;
-    if (ui_get_btn_op_group()) {
-        lv_group_add_obj(ui_get_btn_op_group(), btn_play_pause);
-    }
-#endif
-
-    lv_obj_t *btn_play_next = lv_btn_create(lv_scr_act());
-    lv_obj_set_size(btn_play_next, 50, 50);
-    lv_obj_set_style_radius(btn_play_next, 25, LV_STATE_DEFAULT);
-    lv_obj_clear_flag(btn_play_next, LV_OBJ_FLAG_CHECKABLE);
-    lv_obj_align_to(btn_play_next, btn_play_pause, LV_ALIGN_OUT_RIGHT_MID, 40, 0);
-
-    lv_obj_add_style(btn_play_next, &ui_button_styles()->style_focus_no_outline, LV_STATE_FOCUS_KEY);
-    lv_obj_add_style(btn_play_next, &ui_button_styles()->style_focus_no_outline, LV_STATE_FOCUSED);
-    lv_obj_add_style(btn_play_next, &ui_button_styles()->style_bg, LV_STATE_FOCUS_KEY);
-    lv_obj_add_style(btn_play_next, &ui_button_styles()->style_bg, LV_STATE_FOCUSED);
-    lv_obj_add_style(btn_play_next, &ui_button_styles()->style_bg, LV_STATE_DEFAULT);
-
-    lv_obj_t *label_next = lv_label_create(btn_play_next);
-    lv_label_set_text_static(label_next, LV_SYMBOL_NEXT);
-    lv_obj_set_style_text_font(label_next, &lv_font_montserrat_24, LV_STATE_DEFAULT);
-    lv_obj_set_style_text_color(label_next, lv_color_make(0, 0, 0), LV_STATE_DEFAULT);
-    lv_obj_center(label_next);
-    lv_obj_set_user_data(btn_play_next, (void *) label_next);
-
-#if CONFIG_BSP_BOARD_ESP32_S3_BOX_Lite
-    g_group_list[2] = btn_play_next;
-    lv_obj_add_event_cb(btn_play_next, music_list_next_cb, LV_EVENT_ALL, (void *) btn_play_next);
-    if (ui_get_btn_op_group()) {
-        lv_group_add_obj(ui_get_btn_op_group(), btn_play_next);
-    }
-#else
-    lv_obj_add_event_cb(btn_play_next, btn_prev_next_cb, LV_EVENT_CLICKED, (void *) true);
-#endif
-
-    /* Create volume slider */
-    lv_obj_t *volume_slider = lv_slider_create(lv_scr_act());
-    lv_obj_set_size(volume_slider, 200, 6);
-    lv_obj_set_ext_click_area(volume_slider, 15);
-    lv_obj_align(volume_slider, LV_ALIGN_BOTTOM_MID, 0, -20);
-    lv_slider_set_range(volume_slider, 0, 100);
-    lv_slider_set_value(volume_slider, g_sys_volume, LV_ANIM_ON);
-    lv_obj_add_event_cb(volume_slider, volume_slider_cb, LV_EVENT_VALUE_CHANGED, NULL);
-
-    lv_obj_t *lab_vol_min = lv_label_create(lv_scr_act());
-    lv_label_set_text_static(lab_vol_min, LV_SYMBOL_VOLUME_MID);
-    lv_obj_set_style_text_font(lab_vol_min, &lv_font_montserrat_20, LV_STATE_DEFAULT);
-    lv_obj_align_to(lab_vol_min, volume_slider, LV_ALIGN_OUT_LEFT_MID, -10, 0);
-
-    lv_obj_t *lab_vol_max = lv_label_create(lv_scr_act());
-    lv_label_set_text_static(lab_vol_max, LV_SYMBOL_VOLUME_MAX);
-    lv_obj_set_style_text_font(lab_vol_max, &lv_font_montserrat_20, LV_STATE_DEFAULT);
-    lv_obj_align_to(lab_vol_max, volume_slider, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
-
-    lv_obj_t *lab_title = lv_label_create(lv_scr_act());
-    lv_obj_set_user_data(lab_title, (void *) btn_play_pause);
-    lv_label_set_text_static(lab_title, "Scanning Files...");
-    lv_obj_set_style_text_font(lab_title, &lv_font_montserrat_32, LV_STATE_DEFAULT);
-    lv_obj_align(lab_title, LV_ALIGN_TOP_MID, 0, 20);
-
-    lv_obj_t *music_list = lv_dropdown_create(lv_scr_act());
-    lv_dropdown_clear_options(music_list);
-    lv_dropdown_set_options_static(music_list, "Scanning...");
-    lv_obj_set_width(music_list, 200);
-    lv_obj_align_to(music_list, lab_title, LV_ALIGN_OUT_BOTTOM_MID, 0, 20);
-    lv_obj_set_user_data(music_list, (void *) lab_title);
-    lv_obj_add_event_cb(music_list, music_list_cb, LV_EVENT_VALUE_CHANGED, NULL);
-
-    build_file_list(music_list);
-    audio_player_callback_register(audio_callback, (void *) music_list);
-
-    // initiate playback
-    play_index(file_iterator_get_index(file_iterator));
 }
+

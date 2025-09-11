@@ -115,7 +115,28 @@ static esp_err_t _audio_player_std_clock(uint32_t rate, uint32_t bits_cfg, i2s_s
     esp_err_t ret = ESP_OK;
 
     if (audio_player_type == AUDIO_PLAYER_I2S) {
-        ret = bsp_codec_set_fs(rate, bits_cfg, ch);
+        ESP_LOGI(TAG, "Re-config: speaker rate %"PRIu32", bits %"PRIu32", mode %s", rate, bits_cfg, ch == 1 ? "MONO" : (ch == 2 ? "STEREO" : "INVALID"));
+         ret = bsp_codec_set_fs(rate, bits_cfg, ch);
+
+        // // 构造 fs 配置
+        // esp_codec_dev_sample_info_t fs = {
+        //     .sample_rate = rate,
+        //     .channel = ch,
+        //     .bits_per_sample = bits_cfg,
+        // };
+
+        // // 获取底层 codec 对象
+        // const audio_codec_if_t *codec = bsp_get_es8374_codec();
+        // if (codec && codec->set_fs) {
+        //     if (codec->set_fs(codec, &fs) != 0) {
+        //         ESP_LOGE(TAG, "Failed to set codec sample rate");
+        //         ret = ESP_FAIL;
+        //     }
+        // } else {
+        //     ESP_LOGE(TAG, "codec->set_fs not available");
+        //     ret = ESP_ERR_NOT_SUPPORTED;
+        // }
+
     } else {
         if (s_audio_player_handle == NULL) {
             return ESP_ERR_INVALID_STATE;
@@ -335,26 +356,14 @@ uac_host_device_handle_t get_audio_player_handle(void)
     return s_audio_player_handle;
 }
 
+
+extern void play_index(int index);
 void app_main(void)
 {
-    s_event_queue = xQueueCreate(10, sizeof(s_event_queue_t));
-    assert(s_event_queue != NULL);
-    /* Initialize I2C (for touch and audio) */
+
     bsp_i2c_init();
 
-    /* Initialize display and LVGL */
-    bsp_display_cfg_t cfg = {
-        .lvgl_port_cfg = ESP_LVGL_PORT_INIT_CONFIG(),
-        .buffer_size = BSP_LCD_H_RES * CONFIG_BSP_LCD_DRAW_BUF_HEIGHT,
-        .double_buffer = 0,
-        .flags = {
-            .buff_dma = true,
-        }
-    };
-    bsp_display_start_with_config(&cfg);
 
-    /* Set display brightness to 100% */
-    bsp_display_backlight_on();
 
     bsp_spiffs_mount();
 
@@ -374,15 +383,108 @@ void app_main(void)
 
     ESP_ERROR_CHECK(audio_player_callback_register(_audio_player_callback, NULL));
 
-    static TaskHandle_t uac_task_handle = NULL;
-    BaseType_t ret = xTaskCreatePinnedToCore(uac_lib_task, "uac_events", 4096, NULL,
-                                             USER_TASK_PRIORITY, &uac_task_handle, 1);
-    assert(ret == pdTRUE);
-    ret = xTaskCreatePinnedToCore(usb_lib_task, "usb_events", 4096, (void *)uac_task_handle,
-                                  USB_HOST_TASK_PRIORITY, NULL, 1);
-    assert(ret == pdTRUE);
+    vTaskDelay(2000 / portTICK_PERIOD_MS); 
 
-    bsp_display_lock(0);
-    ui_audio_start(file_iterator);
-    bsp_display_unlock();
+   ui_audio_start(file_iterator);
+
+    bsp_codec_volume_set(60,NULL);
+    FILE *fp = fopen("/spiffs/For_Elise.mp3", "rb");
+    if (fp) {
+        ESP_LOGI(TAG, "Playing '%s'", "For_Elise");
+        audio_player_play(fp);
+    }
+//    bsp_board_init();
+    bsp_codec_volume_set(60,NULL);
+    const audio_codec_if_t *codec = bsp_get_es8374_codec();
+    while(1) {
+
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
+                if (codec) {
+            codec->dump_reg(codec);
+        }
+    }
+   // bsp_display_unlock();
 }
+
+
+
+
+// extern void play_index(int index);
+// void app_main(void)
+// {
+//     s_event_queue = xQueueCreate(10, sizeof(s_event_queue_t));
+//     assert(s_event_queue != NULL);
+//     /* Initialize I2C (for touch and audio) */
+//     bsp_i2c_init();
+
+//     /* Initialize display and LVGL */
+//     bsp_display_cfg_t cfg = {
+//         .lvgl_port_cfg = ESP_LVGL_PORT_INIT_CONFIG(),
+//         .buffer_size = BSP_LCD_H_RES * CONFIG_BSP_LCD_DRAW_BUF_HEIGHT,
+//         .double_buffer = 0,
+//         .flags = {
+//             .buff_dma = true,
+//         }
+//     };
+//     bsp_display_start_with_config(&cfg);
+
+//     /* Set display brightness to 100% */
+//     bsp_display_backlight_on();
+
+//     bsp_spiffs_mount();
+
+//     file_iterator = file_iterator_new(SPIFFS_BASE);
+//     assert(file_iterator != NULL);
+
+
+//     /* Configure I2S peripheral and Power Amplifier */
+//     bsp_board_init();
+
+//     /* Initialize audio player, the default configuration is set to play through the USB headset. */
+//     player_config.mute_fn = _audio_player_mute_fn;
+//     player_config.write_fn = _audio_player_write_fn;
+//     player_config.clk_set_fn = _audio_player_std_clock;
+//     player_config.priority = 1;
+
+//     ESP_ERROR_CHECK(audio_player_new(player_config));
+
+//     ESP_ERROR_CHECK(audio_player_callback_register(_audio_player_callback, NULL));
+
+
+//      bsp_codec_volume_set(100, NULL);
+
+//     // char filename[128];
+
+//     // strcpy(filename, "/spiffs/For_Elise.mp3");
+//     // FILE *fp = fopen(filename, "rb");
+//     // if (fp) {
+//     //     ESP_LOGI(TAG, "Playing '%s'", filename);
+//     //     audio_player_play(fp);
+//     // } else {
+//     //     ESP_LOGE(TAG, "unable to open filename '%s'", filename);
+//     // }
+
+
+//      bsp_display_lock(0);
+//      play_index(file_iterator_get_index(file_iterator));
+//      bsp_display_unlock();
+
+
+
+
+//     // while(1) {
+//     //     vTaskDelay(1000 / portTICK_PERIOD_MS);
+//     // }
+//     // static TaskHandle_t uac_task_handle = NULL;
+//     // BaseType_t ret = xTaskCreatePinnedToCore(uac_lib_task, "uac_events", 4096, NULL,
+//     //                                          USER_TASK_PRIORITY, &uac_task_handle, 1);
+//     // assert(ret == pdTRUE);
+//     // ret = xTaskCreatePinnedToCore(usb_lib_task, "usb_events", 4096, (void *)uac_task_handle,
+//     //                               USB_HOST_TASK_PRIORITY, NULL, 1);
+//     // assert(ret == pdTRUE);
+
+//     // bsp_display_lock(0);
+//     // ui_audio_start(file_iterator);
+//     // bsp_display_unlock();
+// }
+

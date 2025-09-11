@@ -63,8 +63,8 @@ static const board_res_desc_t g_board_box_res = {
     .PMOD2 = &g_pmod[1],
 };
 
-static esp_codec_dev_handle_t play_dev_handle;
-static esp_codec_dev_handle_t record_dev_handle;
+static esp_codec_dev_handle_t play_dev_handle = NULL;
+static esp_codec_dev_handle_t record_dev_handle = NULL;
 
 static button_handle_t *g_btn_handle = NULL;
 static bsp_bottom_property_t g_bottom_handle;
@@ -143,7 +143,7 @@ esp_err_t bsp_i2s_write(void *audio_buffer, size_t len, size_t *bytes_written, u
 esp_err_t bsp_codec_set_fs(uint32_t rate, uint32_t bits_cfg, i2s_slot_mode_t ch)
 {
     esp_err_t ret = ESP_OK;
-
+    ESP_LOGI(TAG, "bsp_codec_set_fs");
     esp_codec_dev_sample_info_t fs = {
         .sample_rate = rate,
         .channel = ch,
@@ -151,17 +151,21 @@ esp_err_t bsp_codec_set_fs(uint32_t rate, uint32_t bits_cfg, i2s_slot_mode_t ch)
     };
 
     if (play_dev_handle) {
-        ret = esp_codec_dev_close(play_dev_handle);
+        ESP_LOGI(TAG, "bsp_codec_set_fs play_dev_handle colse");
+      //  ret = esp_codec_dev_close(play_dev_handle);
     }
     if (record_dev_handle) {
+        ESP_LOGI(TAG, "bsp_codec_set_fs record_dev_handle colse");
         ret |= esp_codec_dev_close(record_dev_handle);
         ret |= esp_codec_dev_set_in_gain(record_dev_handle, CODEC_DEFAULT_ADC_VOLUME);
     }
 
     if (play_dev_handle) {
+        ESP_LOGI(TAG, "bsp_codec_set_fs play_dev_handle open");
         ret |= esp_codec_dev_open(play_dev_handle, &fs);
     }
     if (record_dev_handle) {
+        ESP_LOGI(TAG, "bsp_codec_set_fs record_dev_handle open");
         ret |= esp_codec_dev_open(record_dev_handle, &fs);
     }
     return ret;
@@ -206,9 +210,10 @@ static esp_err_t bsp_codec_init()
     play_dev_handle = bsp_audio_codec_speaker_init();
     assert((play_dev_handle) && "play_dev_handle not initialized");
 
-    record_dev_handle = bsp_audio_codec_microphone_init();
-    assert((record_dev_handle) && "record_dev_handle not initialized");
+    // record_dev_handle = bsp_audio_codec_microphone_init();
+    // assert((record_dev_handle) && "record_dev_handle not initialized");
 
+    bsp_codec_set_fs(CODEC_DEFAULT_SAMPLE_RATE, CODEC_DEFAULT_BIT_WIDTH, CODEC_DEFAULT_CHANNEL);
     bsp_codec_set_fs(CODEC_DEFAULT_SAMPLE_RATE, CODEC_DEFAULT_BIT_WIDTH, CODEC_DEFAULT_CHANNEL);
     return ESP_OK;
 }
@@ -245,13 +250,13 @@ esp_err_t bsp_board_init(void)
 
     ESP_LOGD(TAG, "Board init");
 
-    ESP_ERROR_CHECK(bsp_btn_init());
-#if !CONFIG_BSP_BOARD_ESP32_S3_BOX_Lite
-    ESP_ERROR_CHECK(bsp_btn_register_callback(BSP_BUTTON_MUTE, BUTTON_PRESS_DOWN, mute_btn_handler, (void *)BUTTON_PRESS_DOWN));
-    ESP_ERROR_CHECK(bsp_btn_register_callback(BSP_BUTTON_MUTE, BUTTON_PRESS_UP, mute_btn_handler, (void *)BUTTON_PRESS_UP));
-#endif
+//     ESP_ERROR_CHECK(bsp_btn_init());
+// #if !CONFIG_BSP_BOARD_ESP32_S3_BOX_Lite
+//     ESP_ERROR_CHECK(bsp_btn_register_callback(BSP_BUTTON_MUTE, BUTTON_PRESS_DOWN, mute_btn_handler, (void *)BUTTON_PRESS_DOWN));
+//     ESP_ERROR_CHECK(bsp_btn_register_callback(BSP_BUTTON_MUTE, BUTTON_PRESS_UP, mute_btn_handler, (void *)BUTTON_PRESS_UP));
+// #endif
 
     ESP_ERROR_CHECK(bsp_codec_init());
-    bsp_sensor_init(&g_bottom_handle);
+  //  bsp_sensor_init(&g_bottom_handle);
     return ret;
 }
